@@ -23,31 +23,17 @@ const TokenResponseSchema = z.object({
 });
 
 /**
- * Loads OAuth credentials from the file specified by the VANTA_ENV_FILE environment variable.
- * Validates the file contents using a Zod schema.
- * @throws {Error} If the environment variable is missing, the file cannot be read, or validation fails.
- * @returns {OAuthCredentials} The loaded and validated credentials.
+ * Loads OAuth credentials from environment variables.
+ * @throws {Error} If the environment variables are missing.
+ * @returns {OAuthCredentials} The loaded credentials.
  */
 function loadCredentials(): OAuthCredentials {
-  const envFile = process.env.VANTA_ENV_FILE;
-  if (!envFile) {
-    throw new Error("VANTA_ENV_FILE environment variable is required");
+  const client_id = process.env.VANTA_CLIENT_ID;
+  const client_secret = process.env.VANTA_CLIENT_SECRET;
+  if (!client_id || !client_secret) {
+    throw new Error("VANTA_CLIENT_ID and VANTA_CLIENT_SECRET environment variables are required");
   }
-
-  const CredentialsSchema = z.object({
-    client_id: z.string(),
-    client_secret: z.string(),
-  });
-
-  try {
-    const data = fs.readFileSync(envFile, "utf8");
-    const parsed = CredentialsSchema.parse(JSON.parse(data));
-    return parsed;
-  } catch (error) {
-    throw new Error(
-      `Failed to load credentials from ${envFile}: ${String(error)}`,
-    );
-  }
+  return { client_id, client_secret };
 }
 
 /**
